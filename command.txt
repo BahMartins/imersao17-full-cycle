@@ -1,0 +1,2 @@
+git remote add origin https://github.com/BahMartins/imersao17-full-cycle.git
+git push -u origin main

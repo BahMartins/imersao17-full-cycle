@@ -1,0 +1,7 @@
+Começa um projeto com GO
+go mod init
+
+go mod tidy -> atualiza as dependencias no go.mod
+
+docker-compose up -d -> para subir os containers do docker-compose
+docker-compose exec mysql bash -> acessa o container mysql

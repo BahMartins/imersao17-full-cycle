@@ -1,0 +1,4 @@
+nest g module module-name -> cria um módulo
+nest g resouce resouce-name -> cria um resouce
+
+npm run start:dev -> roda a aplicação em modo dev
