@@ -11,8 +11,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import Link from "next/link";
 import Image from "next/legacy/image";
 import { Product } from "../../models";
-
-const products: Product[] = [];
+import { ProductService } from "@/services/product.service";
 
 async function getProducts({
   search,
@@ -46,7 +45,16 @@ async function getProducts({
   return response.json();
 }
 
-function ListProductsPage() {
+async function ListProductsPage({
+  searchParams,
+}: {
+  searchParams: { search?: string, category_id?: string };
+}) {
+  const products = await getProducts({
+    search: searchParams.search,
+    category_id: searchParams.category_id,
+  });
+
   return (
     <Grid2 container spacing={2}>
       {products.length === 0 && (

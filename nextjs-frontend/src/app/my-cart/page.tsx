@@ -15,43 +15,18 @@ import Link from "next/link";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Total } from "../../components/Total";
 import React from "react";
-
-const products = [
-  {
-    id: "1",
-    name: "Camisa",
-    description: "Camisa branca",
-    price: 100,
-    image_url: "https://source.unsplash.com/random?product",
-    category_id: "1",
-  },
-  {
-    id: "2",
-    name: "Calça",
-    description: "Calça jeans",
-    price: 100,
-    image_url: "https://source.unsplash.com/random?product",
-    category_id: "1",
-  },
-];
-
-const cart = {
-  items: [
-    {
-      product_id: "1",
-      quantity: 2,
-      total: 200,
-    },
-    {
-      product_id: "2",
-      quantity: 1,
-      total: 100,
-    },
-  ],
-  total: 1000,
-};
+import { CartServiceFactory } from "@/services/cart.service";
+import { ProductService } from "@/services/product.service";
+import { removeItemFromCartAction } from "@/server-actions/card.action";
 
 async function MyCartPage() {
+  const cart = CartServiceFactory.create().getCart();
+  const productService = new ProductService();
+
+  const products = await productService.getProductsByIds(
+    cart.items.map((item) => item.product_id)
+  );
+
   return (
     <Box>
       <Typography variant="h3">
@@ -97,7 +72,7 @@ async function MyCartPage() {
                   <ListItem
                     sx={{ display: "flex", justifyContent: "end", p: 0 }}
                   >
-                    <form>
+                    <form action={removeItemFromCartAction}>
                       <input type="hidden" name="index" value={key} />
                       <Button
                         color="error"
