@@ -1,62 +1,80 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { OrderItem } from './order-item.entity';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { OrderItem } from "./order-item.entity";
 
 export enum OrderStatus {
-  PENDING = 'pending',
-  PAID = 'paid',
-  FAILED = 'failed',
+    PENDING = "pending",
+    PAID = "paid",
+    FAILED = "failed",
 }
 
 export type CreateOrderCommand = {
-  client_id: number;
-  items: {
-    product_id: string;
-    quantity: number;
-    price: number;
-  }[];
+    client_id: number;
+    items: {
+        product_id: string;
+        quantity: number;
+        price: number;
+    }[];
 };
 
 @Entity()
 export class Order {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+    @PrimaryGeneratedColumn("uuid")
+    id: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  total: number;
+    @Column({ type: "decimal", precision: 10, scale: 2 })
+    total: number;
 
-  @Column()
-  client_id: number;
+    @Column()
+    client_id: number;
 
-  @Column()
-  status: OrderStatus = OrderStatus.PENDING;
+    @Column()
+    status: OrderStatus = OrderStatus.PENDING;
 
-  @CreateDateColumn()
-  created_at: Date;
+    @CreateDateColumn()
+    created_at: Date;
 
-  @OneToMany(() => OrderItem, (item) => item.order, { cascade: ['insert'] })
-  items: OrderItem[];
+    @OneToMany(() => OrderItem, (item) => item.order, { cascade: ["insert"], eager: true })
+    items: OrderItem[];
 
-  static create(input: CreateOrderCommand) {
-    const order = new Order();
-    order.client_id = input.client_id;
-    order.items = input.items.map((item) => {
-      const ordemItem = new OrderItem();
-      ordemItem.product_id = item.product_id;
-      ordemItem.quantity = item.quantity;
-      ordemItem.price = item.price;
-      return ordemItem;
-    });
+    static create(input: CreateOrderCommand) {
+        const order = new Order();
+        order.client_id = input.client_id;
+        order.items = input.items.map((item) => {
+            const ordemItem = new OrderItem();
+            ordemItem.product_id = item.product_id;
+            ordemItem.quantity = item.quantity;
+            ordemItem.price = item.price;
+            return ordemItem;
+        });
 
-    order.total = order.items.reduce((sum, item) => {
-      return sum + item.price * item.quantity;
-    }, 0);
+        order.total = order.items.reduce((sum, item) => {
+            return sum + item.price * item.quantity;
+        }, 0);
 
-    return order;
-  }
+        return order;
+    }
+
+    pay() {
+        if (this.status === OrderStatus.PAID) {
+            throw new Error("Order already paid");
+        }
+
+        if (this.status === OrderStatus.FAILED) {
+            throw new Error("Order already failed");
+        }
+
+        this.status = OrderStatus.PAID;
+    }
+
+    fail() {
+        if (this.status === OrderStatus.FAILED) {
+            throw new Error("Order already failed");
+        }
+
+        if (this.status === OrderStatus.PAID) {
+            throw new Error("Order already paid");
+        }
+
+        this.status = OrderStatus.FAILED;
+    }
 }
